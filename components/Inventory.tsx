@@ -500,7 +500,7 @@ const InventoryComponent: React.FC<InventoryProps> = ({
     const orderToSave: PurchaseOrder = {
       ...currentPurchaseOrder,
       id: (currentPurchaseOrder as PurchaseOrder).id || crypto.randomUUID(),
-      status: (currentPurchaseOrder as PurchaseOrder).id
+      status: (currentPurchaseOrder as PurchaseOrder).status
         ? currentPurchaseOrder.status
         : PurchaseOrderStatus.Pending,
       totalAmount: 0,
@@ -741,7 +741,7 @@ const InventoryComponent: React.FC<InventoryProps> = ({
       type: "analysis",
     };
 
-    onSaveInventoryRecord(newRecord); // Paso 4: Archivar pedidos completados // 🛑 CORRECCIÓN: Usar Promise.all si onSavePurchaseOrder es asíncrona, o mantener forEach si es síncrona
+    onSaveInventoryRecord(newRecord); // Paso 4: Archivar pedidos completados // 🛑 CORRECCIÓN: Usar Promise.all if onSavePurchaseOrder is async, or maintain forEach if it is sync
 
     purchaseOrders
       .filter((o) => o.status === PurchaseOrderStatus.Completed)
@@ -1275,7 +1275,7 @@ const InventoryComponent: React.FC<InventoryProps> = ({
                 onChange={(e) => setSelectedLocationColumn(e.target.value)}
                 className="bg-gray-700 text-white rounded-lg p-1.5 w-full text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
-                <option value="all">Ver todas las Ubicaciones</option>
+                <option value="all">Todas las Ubicaciones</option>
                 {INVENTORY_LOCATIONS.map((loc) => (
                   <option key={loc} value={loc}>
                     {loc}
@@ -1288,7 +1288,7 @@ const InventoryComponent: React.FC<InventoryProps> = ({
             <div className="flex justify-end items-center gap-2 flex-wrap w-full md:w-auto">
               <button
                 onClick={handleResetInventory}
-                className="bg-red-600 hover:bg-red-700 text-white font-medium py-1 px-3 rounded-lg flex items-center gap-1.5 text-sm transition duration-300"
+                className="bg-red-600 hover:bg-red-700 text-white font-medium py-1.5 px-3 rounded-lg flex items-center gap-1.5 text-sm transition duration-300 h-7"
               >
                 <RefreshIcon className="h-4 w-4" />
                 {/* Texto abreviado para móvil */}
@@ -1296,7 +1296,7 @@ const InventoryComponent: React.FC<InventoryProps> = ({
               </button>
               <button
                 onClick={handleSaveInventorySnapshot}
-                className="bg-violet-600 hover:bg-violet-700 text-white font-medium py-1 px-3 rounded-lg flex items-center gap-1.5 text-sm transition duration-300"
+                className="bg-violet-600 hover:bg-violet-700 text-white font-medium py-1.5 px-3 rounded-lg flex items-center gap-1.5 text-sm transition duration-300 h-7"
               >
                 <InventoryIcon className="h-4 w-4" />
                 {/* Texto abreviado para móvil */}
@@ -1304,7 +1304,7 @@ const InventoryComponent: React.FC<InventoryProps> = ({
               </button>
               <button
                 onClick={() => openInventoryModal(undefined)}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-1 px-3 rounded-lg flex items-center gap-1.5 text-sm transition duration-300"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-1.5 px-3 rounded-lg flex items-center gap-1.5 text-sm transition duration-300 h-7"
               >
                 <PlusIcon className="h-4 w-4" />
                 <span className="hidden md:inline">Nuevo Producto</span>
@@ -1331,10 +1331,12 @@ const InventoryComponent: React.FC<InventoryProps> = ({
                   initialOpen={true} // ABRIR POR DEFECTO EN INVENTARIO
                 >
                   <div className="overflow-x-auto">
-                    <table className="min-w-full">
+                    {/* 🛑 table-fixed Mantiene las columnas fijas a la derecha */}
+                    <table className="min-w-full table-fixed">
                       <thead>
                         <tr>
-                          <th className="p-1 text-left text-xs font-medium text-gray-300 uppercase sticky left-0 bg-slate-800 z-10 w-[120px] sm:w-[180px]">
+                          {/* 🛑 CLAVE DE LA CORRECCIÓN: w-full para que esta columna absorba todo el espacio restante */}
+                          <th className="p-1 text-left text-xs font-medium text-gray-300 uppercase sticky left-0 bg-slate-800 z-10 w-full whitespace-nowrap overflow-hidden text-ellipsis">
                             NOMBRE
                           </th>
                           {/* Determinar qué ubicaciones se muestran */}
@@ -1344,26 +1346,24 @@ const InventoryComponent: React.FC<InventoryProps> = ({
                           ).map((loc) => (
                             <th
                               key={loc}
-                              // 🛑 AJUSTE DE CLASES: Se aumenta el ancho (w-32/48) para que quepa el texto completo y se centra.
-                              // Se usa 'overflow-visible' y 'text-center'.
-                              className={`p-1 text-center text-xs font-medium text-gray-300 uppercase ${
-                                selectedLocationColumn === "all"
-                                  ? "w-[40px] sm:w-[70px] whitespace-nowrap overflow-hidden text-ellipsis"
-                                  : "w-32 sm:w-48 whitespace-nowrap overflow-visible"
-                              }`}
+                              // 🛑 Ancho pequeño y fijo para el campo de stock
+                              className={`p-1 text-center text-xs font-medium text-gray-300 uppercase w-16 whitespace-nowrap overflow-hidden text-ellipsis`}
                               title={loc}
                             >
-                              {/* CORRECCIÓN: Mostrar el nombre completo y centrado */}
-                              {loc.toUpperCase()}
+                              {/* Muestra "REST" si se ha seleccionado una sola ubicación */}
+                              {selectedLocationColumn !== "all"
+                                ? "REST"
+                                : loc.toUpperCase()}
                             </th>
                           ))}
 
-                          {selectedLocationColumn === "all" && (
-                            <th className="p-1 text-center text-xs font-medium text-gray-300 uppercase w-[40px] sm:w-20">
-                              TOTAL
-                            </th>
-                          )}
-                          <th className="p-1 text-right text-xs font-medium text-gray-300 uppercase w-10 sm:w-20">
+                          {/* 🛑 MODIFICACIÓN: Mostrar TOTAL siempre */}
+                          <th className="p-1 text-center text-xs font-medium text-gray-300 uppercase w-20">
+                            TOTAL
+                          </th>
+
+                          {/* Ancho fijo para acciones */}
+                          <th className="p-1 text-right text-xs font-medium text-gray-300 uppercase w-14">
                             ACCIONES
                           </th>
                         </tr>
@@ -1371,7 +1371,8 @@ const InventoryComponent: React.FC<InventoryProps> = ({
                       <tbody className="divide-y divide-gray-700/50">
                         {items.map((item) => (
                           <tr key={item.id} className="hover:bg-gray-700/50">
-                            <td className="p-1 whitespace-nowrap text-sm font-medium text-white sticky left-0 bg-slate-800 z-10 w-[120px] sm:w-[180px]">
+                            {/* 🛑 CLAVE DE LA CORRECCIÓN: w-full para la celda de NOMBRE */}
+                            <td className="p-1 whitespace-nowrap text-sm font-medium text-white sticky left-0 bg-slate-800 z-10 w-full overflow-hidden text-ellipsis">
                               {item.name}
                             </td>
                             {/* Renderizar campos de input solo para la columna seleccionada o todas */}
@@ -1381,12 +1382,8 @@ const InventoryComponent: React.FC<InventoryProps> = ({
                             ).map((loc) => (
                               <td
                                 key={loc}
-                                // 🛑 CORRECCIÓN CLAVE: Usamos flexbox para centrar el contenido del input.
-                                className={`p-1 whitespace-nowrap ${
-                                  selectedLocationColumn === "all"
-                                    ? "w-[40px] sm:w-[70px] text-center"
-                                    : "w-32 sm:w-48 text-center"
-                                }`}
+                                // 🛑 text-center para el botón, y ancho fijo (w-16)
+                                className={`p-1 whitespace-nowrap text-center w-16`}
                               >
                                 <input
                                   type="text"
@@ -1408,46 +1405,50 @@ const InventoryComponent: React.FC<InventoryProps> = ({
                                     )
                                   }
                                   onBlur={() => handleStockInputBlur(item, loc)}
-                                  // Mantenemos el tamaño pequeño fijo del recuadro, ahora centrado por el text-align del <td>
-                                  className="bg-slate-700 text-white rounded p-0.5 w-8 sm:w-14 text-center text-xs sm:text-sm border border-slate-600 inline-block"
+                                  // 🛑 ESTILO DE BOTÓN Y CENTRADO: p-1 para el padding, w-10 para el ancho, rounded-md
+                                  className="bg-slate-700 text-white rounded-md p-1 w-10 text-center text-sm border border-slate-700 inline-block"
                                   placeholder="0"
                                 />
                               </td>
                             ))}
-                            {selectedLocationColumn === "all" && (
-                              <td className="p-1 text-center whitespace-nowrap text-lg font-bold w-[40px] sm:w-20">
-                                <span
-                                  className={
-                                    calculateTotalStock(item) > 0.001
-                                      ? "text-green-400"
-                                      : "text-slate-400"
-                                  }
-                                >
-                                  {calculateTotalStock(item)
-                                    .toFixed(1)
-                                    .replace(".", ",")}
-                                </span>
-                              </td>
-                            )}
-                            <td className="p-1 whitespace-nowrap text-right text-sm w-10 sm:w-20">
-                              <button
-                                onClick={() => openInventoryModal(item)}
-                                className="text-indigo-400 mr-1"
-                                title="Editar Artículo"
-                              >
-                                <PencilIcon />
-                              </button>
-                              <button
-                                onClick={() =>
-                                  window.confirm(
-                                    "¿Seguro que quieres eliminar este artículo?"
-                                  ) && onDeleteInventoryItem(item.id)
+
+                            {/* 🛑 MODIFICACIÓN: Mostrar TOTAL siempre */}
+                            <td className="p-1 text-center whitespace-nowrap text-lg font-bold w-20">
+                              <span
+                                className={
+                                  calculateTotalStock(item) > 0.001
+                                    ? "text-green-400"
+                                    : "text-slate-400"
                                 }
-                                className="text-red-500"
-                                title="Eliminar Artículo"
                               >
-                                <TrashIcon />
-                              </button>
+                                {calculateTotalStock(item)
+                                  .toFixed(1)
+                                  .replace(".", ",")}
+                              </span>
+                            </td>
+
+                            {/* Ancho fijo para acciones y usar justify-end */}
+                            <td className="p-1 whitespace-nowrap text-right text-sm w-14">
+                              <div className="flex justify-end items-center gap-1">
+                                <button
+                                  onClick={() => openInventoryModal(item)}
+                                  className="text-indigo-400"
+                                  title="Editar Artículo"
+                                >
+                                  <PencilIcon />
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    window.confirm(
+                                      "¿Seguro que quieres eliminar este artículo?"
+                                    ) && onDeleteInventoryItem(item.id)
+                                  }
+                                  className="text-red-500"
+                                  title="Eliminar Artículo"
+                                >
+                                  <TrashIcon />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))}
