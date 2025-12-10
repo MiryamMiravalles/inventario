@@ -1454,7 +1454,8 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-900 flex flex-col">
-      <nav className="bg-slate-900/80 backdrop-blur-sm shadow-lg sticky top-0 z-10 border-b border-slate-800">
+      <nav className="bg-slate-900/80 backdrop-blur-sm shadow-lg sticky top-0 z-30 border-b border-slate-800">
+        {" "}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex-shrink-0 text-violet-400 font-bold text-xl">
@@ -1489,7 +1490,6 @@ const App: React.FC = () => {
             </div>
           </div>
         </div>
-
         {isMenuOpen && (
           <div className="md:hidden" id="mobile-menu">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
@@ -1510,8 +1510,11 @@ const App: React.FC = () => {
         )}
       </nav>
 
-      <main className="flex-grow">
-        <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <main className="flex-grow pt-16">
+        {" "}
+        {/* Añadir padding-top para dejar espacio al navbar fijo */}
+        {/* Eliminar py-6 para evitar doble padding */}
+        <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
           {renderContent()}
         </div>
       </main>
