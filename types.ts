@@ -1,5 +1,4 @@
-export type View = "inventory";
-
+export type View = "inventory" | "orders" | "analysis" | "history";
 export enum PurchaseOrderStatus {
   Pending = "Pending",
   Completed = "Completed",

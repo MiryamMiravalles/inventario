@@ -32,8 +32,8 @@ interface InventoryProps {
     updates: { name: string; stock: number }[],
     mode: "set" | "add"
   ) => void;
-  onSaveInventoryRecord: (record: InventoryRecord) => void;
-  onDeleteAllInventoryRecords: () => void; // NUEVAS PROPS:
+  onSaveInventoryRecord: (record: InventoryRecord) => void; // NUEVAS PROPS:
+  onDeleteAllInventoryRecords: () => void;
   formatUTCToLocal: (utcDateString: string | Date | undefined) => string;
   handleResetInventoryStocks: () => void;
 }
@@ -1215,42 +1215,9 @@ const InventoryComponent: React.FC<InventoryProps> = ({
 
   return (
     <div className="p-4 animate-fade-in">
-      {/* Contenedor Sticky para Título y Tabs */}
-      <div className="sticky top-16 z-20 bg-slate-900/90 backdrop-blur-sm pt-1 pb-3">
-        <div className="flex justify-between items-center mb-2">
-          {" "}
-          <div className="flex gap-1">
-            <div className="bg-gray-800 p-0.5 rounded-lg flex space-x-0.5">
-              {/* Botones de Pestaña */}
-              <button
-                onClick={() => setActiveTab("inventory")}
-                className={tabClasses("inventory")}
-              >
-                Inventario
-              </button>
-              <button
-                onClick={() => setActiveTab("orders")}
-                className={tabClasses("orders")}
-              >
-                Pedidos
-              </button>
-              <button
-                onClick={() => setActiveTab("analysis")}
-                className={tabClasses("analysis")}
-              >
-                Análisis
-              </button>
-              <button
-                onClick={() => setActiveTab("history")}
-                className={tabClasses("history")}
-              >
-                Historial
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* Fin Contenedor Sticky */}
+      {/* 🛑 Hemos movido la barra sticky del menú al componente principal (App.tsx) para el control global. 
+         Esta sección se mantiene vacía para evitar duplicidad y confiar en el componente padre. */}
+
       {activeTab === "inventory" && (
         <div className="space-y-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
@@ -1275,7 +1242,7 @@ const InventoryComponent: React.FC<InventoryProps> = ({
                 onChange={(e) => setSelectedLocationColumn(e.target.value)}
                 className="bg-gray-700 text-white rounded-lg p-1.5 w-full text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
-                <option value="all">Todas las Ubicaciones</option>
+                <option value="all">Ver todas las Ubicaciones</option>
                 {INVENTORY_LOCATIONS.map((loc) => (
                   <option key={loc} value={loc}>
                     {loc}
@@ -1335,8 +1302,8 @@ const InventoryComponent: React.FC<InventoryProps> = ({
                     <table className="min-w-full table-fixed">
                       <thead>
                         <tr>
-                          {/* 🛑 CLAVE DE LA CORRECCIÓN: w-full para que esta columna absorba todo el espacio restante */}
-                          <th className="p-1 text-left text-xs font-medium text-gray-300 uppercase sticky left-0 bg-slate-800 z-10 w-full whitespace-nowrap overflow-hidden text-ellipsis">
+                          {/* 🛑 CORRECCIÓN: w-full, nowrap, overflow-hidden, y text-ellipsis para forzar una línea con recorte */}
+                          <th className="p-1 text-left text-xs font-medium text-gray-300 uppercase sticky left-0 bg-slate-800 z-10 w-full min-w-[150px] max-w-[220px] whitespace-nowrap overflow-hidden text-ellipsis">
                             NOMBRE
                           </th>
                           {/* Determinar qué ubicaciones se muestran */}
@@ -1371,8 +1338,8 @@ const InventoryComponent: React.FC<InventoryProps> = ({
                       <tbody className="divide-y divide-gray-700/50">
                         {items.map((item) => (
                           <tr key={item.id} className="hover:bg-gray-700/50">
-                            {/* 🛑 CLAVE DE LA CORRECCIÓN: w-full para la celda de NOMBRE */}
-                            <td className="p-1 whitespace-nowrap text-sm font-medium text-white sticky left-0 bg-slate-800 z-10 w-full overflow-hidden text-ellipsis">
+                            {/* 🛑 CORRECCIÓN: Celda de NOMBRE. w-full y ellipsis para forzar el recorte y alineación */}
+                            <td className="p-1 whitespace-nowrap overflow-hidden text-ellipsis text-sm font-medium text-white sticky left-0 bg-slate-800 z-10 w-full min-w-[150px] max-w-[220px]">
                               {item.name}
                             </td>
                             {/* Renderizar campos de input solo para la columna seleccionada o todas */}
@@ -1382,7 +1349,7 @@ const InventoryComponent: React.FC<InventoryProps> = ({
                             ).map((loc) => (
                               <td
                                 key={loc}
-                                // 🛑 text-center para el botón, y ancho fijo (w-16)
+                                // 🛑 text-center para el input, y ancho fijo (w-16)
                                 className={`p-1 whitespace-nowrap text-center w-16`}
                               >
                                 <input

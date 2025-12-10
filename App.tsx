@@ -1209,7 +1209,7 @@ const App: React.FC = () => {
     }
   );
 
-  // --- EFECTOS DE PERSISTENCIA (LocalStorage) ---
+  // --- EFECTOS de Persistencia (LocalStorage) ---
   useEffect(() => {
     try {
       localStorage.setItem(
@@ -1224,6 +1224,9 @@ const App: React.FC = () => {
   // --- CÁLCULOS Y HELPERS ---
   const navItems: { id: View; label: string }[] = [
     { id: "inventory", label: "Inventario" },
+    { id: "orders", label: "Pedidos" },
+    { id: "analysis", label: "Análisis" },
+    { id: "history", label: "Historial" },
   ];
 
   const uniqueSuppliers = useMemo(() => {
@@ -1445,76 +1448,71 @@ const App: React.FC = () => {
     );
   };
 
-  const navClasses = (view: View) =>
-    `px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-      activeView === view
-        ? "bg-violet-600 text-white shadow-lg"
-        : "text-slate-300 hover:bg-slate-700 hover:text-white"
+  const tabClasses = (tabName: View) =>
+    `px-2 py-1 text-xs font-medium rounded-md transition-colors duration-200 ${
+      activeView === tabName
+        ? "bg-indigo-600 text-white"
+        : "bg-gray-700 text-gray-300 hover:bg-gray-600"
     }`;
+
+  // Función helper para cambiar la vista y cerrar el menú
+  const handleSetActiveTab = (tab: View) => {
+    setActiveView(tab);
+    setIsMenuOpen(false);
+  };
 
   return (
     <div className="min-h-screen bg-slate-900 flex flex-col">
-      <nav className="bg-slate-900/80 backdrop-blur-sm shadow-lg sticky top-0 z-30 border-b border-slate-800">
-        {" "}
+      {/* 1. Contenedor Sticky Superior (Hamburguesa Arriba) */}
+      <div className="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-sm shadow-lg border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex-shrink-0 text-violet-400 font-bold text-xl">
+          <div className="flex justify-between items-center h-16">
+            {/* TÍTULO ENCABEZADO */}
+            <h1 className="text-xl font-bold text-white">
               Control de Stock y Pedidos
-            </div>
+            </h1>
 
-            <div className="hidden md:block">
-              <div className="flex items-baseline space-x-4">
-                {navItems.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveView(item.id)}
-                    className={navClasses(item.id)}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="-mr-2 flex md:hidden">
-              <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                type="button"
-                className="bg-slate-800 inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-white hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-white"
-                aria-controls="mobile-menu"
-                aria-expanded="false"
-              >
-                <span className="sr-only">Open main menu</span>
-                {isMenuOpen ? <XIcon /> : <MenuIcon />}
-              </button>
-            </div>
+            {/* BOTÓN DE MENÚ (Controla el menú de pestañas - Visible en todas las resoluciones) */}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="bg-gray-800 p-2 rounded-lg text-white"
+            >
+              {isMenuOpen ? (
+                <XIcon className="h-6 w-6" />
+              ) : (
+                <MenuIcon className="h-6 w-6" />
+              )}
+            </button>
           </div>
         </div>
-        {isMenuOpen && (
-          <div className="md:hidden" id="mobile-menu">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              {navItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    setActiveView(item.id);
-                    setIsMenuOpen(false);
-                  }}
-                  className={`${navClasses(item.id)} block w-full text-left`}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </nav>
+      </div>
 
-      <main className="flex-grow pt-16">
-        {" "}
-        {/* Añadir padding-top para dejar espacio al navbar fijo */}
-        {/* Eliminar py-6 para evitar doble padding */}
-        <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+      {/* 2. Menú de Pestañas (Controlado por la hamburguesa superior, se muestra ABAJO, NO STICKY) */}
+      {isMenuOpen && (
+        <div
+          className={`
+            bg-gray-800 p-0.5 rounded-lg space-x-0.5 mb-3 mx-4 sm:mx-6 lg:mx-8 mt-2
+            flex flex-col md:flex-row space-y-1 md:space-y-0 md:space-x-1 w-auto
+          `}
+        >
+          {/* Botones de Pestaña */}
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => handleSetActiveTab(item.id)}
+              className={tabClasses(item.id)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* 3. Menú Secundario / Título de Contenido (NO STICKY) */}
+      <main className="flex-grow pt-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* 🛑 Se elimina el título y el botón duplicados de aquí. */}
+
           {renderContent()}
         </div>
       </main>
