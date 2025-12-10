@@ -82,7 +82,7 @@ const CATEGORY_ORDER = [
   "🍻 Cerveza",
 ];
 
-// --- Local Components (Se mantienen) ---
+// --- Local Components (CategoryAccordion and WeeklyConsumptionAnalysis remain unchanged) ---
 
 interface CategoryAccordionProps {
   title: string;
@@ -1215,14 +1215,49 @@ const InventoryComponent: React.FC<InventoryProps> = ({
 
   return (
     <div className="p-4 animate-fade-in">
-      {/* 🛑 Hemos movido la barra sticky del menú al componente principal (App.tsx) para el control global. 
-         Esta sección se mantiene vacía para evitar duplicidad y confiar en el componente padre. */}
-
+      {/* Contenedor Sticky para Título y Tabs */}
+      <div className="sticky top-16 z-20 bg-slate-900/90 backdrop-blur-sm pt-1 pb-3">
+        <div className="flex justify-between items-center mb-2">
+          {" "}
+          <div className="flex gap-1">
+            <div className="bg-gray-800 p-0.5 rounded-lg flex space-x-0.5">
+              {/* Botones de Pestaña */}
+              <button
+                onClick={() => setActiveTab("inventory")}
+                className={tabClasses("inventory")}
+              >
+                Inventario
+              </button>
+              <button
+                onClick={() => setActiveTab("orders")}
+                className={tabClasses("orders")}
+              >
+                Pedidos
+              </button>
+              <button
+                onClick={() => setActiveTab("analysis")}
+                className={tabClasses("analysis")}
+              >
+                Análisis
+              </button>
+              <button
+                onClick={() => setActiveTab("history")}
+                className={tabClasses("history")}
+              >
+                Historial
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Fin Contenedor Sticky */}
       {activeTab === "inventory" && (
         <div className="space-y-6">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
-            {/* Campo de Búsqueda */}
-            <div className="relative w-full md:max-w-xs">
+          {/* 🛑 CONTENEDOR DE CONTROLES SUPERIOR (FLEXIBLE PARA MÓVIL HORIZONTAL) */}
+          {/* Usamos flex-nowrap y justify-between para forzar la línea y empujar los elementos al final. */}
+          <div className="flex justify-between items-center mb-4 gap-2 flex-wrap sm:flex-nowrap">
+            {/* Campo de Búsqueda (Flex-grow para ocupar el espacio, comprimido en móvil, y ancho mínimo) */}
+            <div className="relative flex-grow min-w-[100px] max-w-[200px] w-auto">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                 <SearchIcon className="h-4 w-4" />
               </div>
@@ -1235,14 +1270,14 @@ const InventoryComponent: React.FC<InventoryProps> = ({
               />
             </div>
 
-            {/* 🛑 SELECTOR DE UBICACIÓN GLOBAL */}
-            <div className="w-full md:w-auto">
+            {/* 🛑 SELECTOR DE UBICACIÓN GLOBAL (Ancho AUMENTADO a min-w-[180px] y flex-shrink) */}
+            <div className="flex-shrink w-full min-w-[180px] max-w-[200px] sm:w-auto">
               <select
                 value={selectedLocationColumn}
                 onChange={(e) => setSelectedLocationColumn(e.target.value)}
                 className="bg-gray-700 text-white rounded-lg p-1.5 w-full text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
-                <option value="all">Ver todas las Ubicaciones</option>
+                <option value="all">Todas las Ubicaciones</option>
                 {INVENTORY_LOCATIONS.map((loc) => (
                   <option key={loc} value={loc}>
                     {loc}
@@ -1252,26 +1287,31 @@ const InventoryComponent: React.FC<InventoryProps> = ({
             </div>
             {/* FIN SELECTOR */}
 
-            <div className="flex justify-end items-center gap-2 flex-wrap w-full md:w-auto">
+            {/* 🛑 Contenedor de Botones (Solo Íconos en móvil, Texto en desktop) */}
+            <div className="flex items-center gap-1 flex-shrink-0">
               <button
                 onClick={handleResetInventory}
                 className="bg-red-600 hover:bg-red-700 text-white font-medium py-1.5 px-3 rounded-lg flex items-center gap-1.5 text-sm transition duration-300 h-7"
+                title="Resetear Stock a 0"
               >
                 <RefreshIcon className="h-4 w-4" />
-                {/* Texto abreviado para móvil */}
+                {/* Ocultar texto en móvil/móvil horizontal, mostrar en MD (Desktop) */}
                 <span className="hidden md:inline">Resetear</span>
               </button>
+
               <button
                 onClick={handleSaveInventorySnapshot}
                 className="bg-violet-600 hover:bg-violet-700 text-white font-medium py-1.5 px-3 rounded-lg flex items-center gap-1.5 text-sm transition duration-300 h-7"
+                title="Guardar Snapshot"
               >
                 <InventoryIcon className="h-4 w-4" />
-                {/* Texto abreviado para móvil */}
                 <span className="hidden md:inline">Guardar</span>
               </button>
+
               <button
                 onClick={() => openInventoryModal(undefined)}
                 className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-1.5 px-3 rounded-lg flex items-center gap-1.5 text-sm transition duration-300 h-7"
+                title="Nuevo Producto"
               >
                 <PlusIcon className="h-4 w-4" />
                 <span className="hidden md:inline">Nuevo Producto</span>
@@ -1302,7 +1342,7 @@ const InventoryComponent: React.FC<InventoryProps> = ({
                     <table className="min-w-full table-fixed">
                       <thead>
                         <tr>
-                          {/* 🛑 CORRECCIÓN: w-full, nowrap, overflow-hidden, y text-ellipsis para forzar una línea con recorte */}
+                          {/* 🛑 CLAVE DE LA CORRECCIÓN: w-full para que esta columna absorba todo el espacio restante */}
                           <th className="p-1 text-left text-xs font-medium text-gray-300 uppercase sticky left-0 bg-slate-800 z-10 w-full min-w-[150px] max-w-[220px] whitespace-nowrap overflow-hidden text-ellipsis">
                             NOMBRE
                           </th>
