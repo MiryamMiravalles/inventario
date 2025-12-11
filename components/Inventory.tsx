@@ -1291,7 +1291,7 @@ const InventoryComponent: React.FC<InventoryProps> = ({
                 title="Nuevo Producto"
               >
                 <PlusIcon className="h-4 w-4" />
-                <span>Nuevo Producto</span>
+                <span>Producto</span>
               </button>
             </div>
           </div>
@@ -1775,7 +1775,7 @@ const InventoryComponent: React.FC<InventoryProps> = ({
               onClick={handleDeleteAllHistory}
               className="bg-red-600 hover:bg-red-700 text-white font-medium py-1 px-3 rounded-lg flex items-center gap-1.5 text-sm transition duration-300"
             >
-              <TrashIcon /> Borrar Historial Completo
+              <TrashIcon /> Borrar Historial
             </button>
           </div>
           <WeeklyConsumptionAnalysis
