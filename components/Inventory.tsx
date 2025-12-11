@@ -1768,9 +1768,7 @@ const InventoryComponent: React.FC<InventoryProps> = ({
       {activeTab === "history" && (
         <div className="bg-gray-800 shadow-xl rounded-lg p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-white">
-              Historial de Inventarios Guardados 📊
-            </h2>
+            <h2 className="text-xl font-bold text-white">Historial 📊</h2>
             <button
               onClick={handleDeleteAllHistory}
               className="bg-red-600 hover:bg-red-700 text-white font-medium py-1 px-3 rounded-lg flex items-center gap-1.5 text-sm transition duration-300"
@@ -1782,7 +1780,7 @@ const InventoryComponent: React.FC<InventoryProps> = ({
             inventoryHistory={validInventoryHistory}
             formatUTCToLocal={formatUTCToLocal}
           />
-          <h3 className="text-xl font-bold text-white mb-3 mt-8 border-t border-gray-700 pt-4">
+          <h3 className="text-l font-bold text-white mb-3 mt-8 border-t border-gray-700 pt-4">
             Registros Anteriores
           </h3>
           {validInventoryHistory.length > 0 ? (
