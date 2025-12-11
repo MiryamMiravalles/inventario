@@ -36,6 +36,7 @@ interface InventoryProps {
   onDeleteAllInventoryRecords: () => void;
   formatUTCToLocal: (utcDateString: string | Date | undefined) => string;
   handleResetInventoryStocks: () => void;
+  activeTab: "inventory" | "orders" | "analysis" | "history"; // Propiedad activa de App.tsx
 }
 
 const emptyInventoryItem: Omit<InventoryItem, "id" | "stockByLocation"> = {
@@ -223,10 +224,9 @@ const InventoryComponent: React.FC<InventoryProps> = ({
   onDeleteAllInventoryRecords,
   formatUTCToLocal,
   handleResetInventoryStocks,
+  activeTab, // ACEPTAMOS activeTab como prop
 }) => {
-  const [activeTab, setActiveTab] = useState<
-    "inventory" | "orders" | "analysis" | "history"
-  >("inventory");
+  // const [activeTab, setActiveTab] = useState<...>("inventory"); // Eliminado
 
   const [isInventoryModalOpen, setInventoryModalOpen] = useState(false);
   const [currentInventoryItem, setCurrentInventoryItem] =
@@ -965,299 +965,15 @@ const InventoryComponent: React.FC<InventoryProps> = ({
     );
   };
 
-  // ---- RENDERIZADO PRINCIPAL ----
-
-  const tabClasses = (
-    tabName: "inventory" | "orders" | "analysis" | "history"
-  ) =>
-    `px-2 py-1 text-xs font-medium rounded-md transition-colors duration-200 ${
-      activeTab === tabName
-        ? "bg-indigo-600 text-white"
-        : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-    }`;
-
-  const renderInventoryForm = () => (
-    <div className="space-y-4">
-      <input
-        type="text"
-        placeholder="Nombre del Artículo"
-        value={currentInventoryItem.name || ""}
-        onChange={(e) => handleInventoryChange("name", e.target.value)}
-        className="bg-gray-700 text-white rounded p-2 w-full"
-      />
-      <select
-        value={currentInventoryItem.category || ""}
-        onChange={(e) => handleInventoryChange("category", e.target.value)}
-        className="bg-gray-700 text-white rounded p-2 w-full"
-      >
-        <option value="" disabled>
-          Seleccionar Categoría
-        </option>
-        {CATEGORY_ORDER.map((category) => (
-          <option key={category} value={category}>
-            {category}
-          </option>
-        ))}
-        {currentInventoryItem.category &&
-          !CATEGORY_ORDER.includes(currentInventoryItem.category) && (
-            <option
-              key={currentInventoryItem.category}
-              value={currentInventoryItem.category}
-            >
-              {currentInventoryItem.category} (Custom)
-            </option>
-          )}
-      </select>
-    </div>
-  );
-
-  const renderOrderForm = () => {
-    // 🛑 CORRECCIÓN: Validamos que haya nombre de proveedor Y que todos los ítems tengan ID y cantidad > 0
-
-    // 1. Debe haber al menos un artículo en la lista.
-    const hasItems = currentPurchaseOrder.items.length > 0;
-
-    // 2. Que todos los artículos añadidos sean válidos (cantidad > 0.001 Y artículo seleccionado).
-    const allItemsAreValid = currentPurchaseOrder.items.every(
-      (item) => item.quantity > 0.001 && item.inventoryItemId.trim() !== ""
-    );
-
-    // 3. Que haya un nombre de proveedor.
-    const hasSupplierName = currentPurchaseOrder.supplierName.trim() !== "";
-
-    // El botón se activa solo si: hay proveedor Y hay artículos Y todos los artículos son válidos.
-    const canSave = hasSupplierName && hasItems && allItemsAreValid; // 🛑 Lógica de activación corregida
-
-    let disabledTitle = "Guardar pedido";
-
-    if (!hasSupplierName) {
-      disabledTitle = "Introduce el proveedor para guardar";
-    } else if (!hasItems) {
-      disabledTitle = "Añade al menos un artículo al pedido para guardar"; // 🛑 Mensaje actualizado
-    } else if (!allItemsAreValid) {
-      disabledTitle =
-        "Asegúrate de que todos los artículos tienen cantidad positiva y están seleccionados";
-    }
-
-    return (
-      <div className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input
-            type="date"
-            value={currentPurchaseOrder.orderDate}
-            onChange={(e) => handleOrderChange("orderDate", e.target.value)}
-            className="bg-gray-700 text-white rounded p-2 w-full"
-          />
-          <div className="relative">
-            <input
-              type="text"
-              list="supplier-list"
-              placeholder="Proveedor"
-              value={currentPurchaseOrder.supplierName}
-              onChange={(e) =>
-                handleOrderChange("supplierName", e.target.value)
-              }
-              className="bg-gray-700/50 text-white rounded p-2 w-full"
-            />
-            <datalist id="supplier-list">
-              {suppliers.map((s) => (
-                <option key={s} value={s} />
-              ))}
-            </datalist>
-          </div>
-        </div>
-        <h3 className="text-lg font-bold text-white pt-4">
-          Artículos del Pedido
-        </h3>
-        <div className="relative mb-4">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-            <SearchIcon />
-          </div>
-          <input
-            type="text"
-            placeholder="Buscar producto para añadir..."
-            value={orderSearchTerm}
-            onChange={(e) => setOrderSearchTerm(e.target.value)}
-            className="bg-gray-700 text-white rounded-lg pl-10 pr-4 py-2 w-full border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-400"
-          />
-        </div>
-        {orderSearchTerm && filteredOrderItems.length > 0 && (
-          <div className="bg-slate-900/50 rounded-md p-2 space-y-1">
-            {filteredOrderItems.slice(0, 5).map((item) => {
-              const isAlreadyInOrder = currentPurchaseOrder.items.some(
-                (oi) => oi.inventoryItemId === item.id
-              );
-
-              return (
-                <div
-                  key={item.id}
-                  className={`flex justify-between items-center p-2 rounded-sm ${
-                    isAlreadyInOrder
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:bg-slate-700/50"
-                  }`}
-                >
-                  <span className="text-white text-sm">{item.name}</span>
-                  <button
-                    onClick={() => handleAddProductFromSearch(item)}
-                    className={`p-1 rounded text-white text-xs flex items-center gap-1 ${
-                      isAlreadyInOrder
-                        ? "bg-gray-500 cursor-not-allowed"
-                        : "bg-green-600 hover:bg-green-700"
-                    }`}
-                    disabled={isAlreadyInOrder}
-                  >
-                    {isAlreadyInOrder ? "Añadido" : "✅ Añadir"}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        )}
-        {currentPurchaseOrder.items.map((orderItem, index) => {
-          const itemDetails = inventoryItems.find(
-            (item) => item.id === orderItem.inventoryItemId
-          ); // Artículos disponibles para el select (no deben estar ya en el pedido)
-          const availableItems = inventoryItems.filter(
-            (item) =>
-              !currentPurchaseOrder.items.some(
-                (oi, i) => i !== index && oi.inventoryItemId === item.id
-              )
-          );
-
-          return (
-            <div
-              key={index}
-              className="flex gap-2 items-center p-2 bg-gray-900/50 rounded-md"
-            >
-              {orderItem.inventoryItemId && itemDetails ? (
-                <span className="text-white w-1/3 flex-shrink-0">
-                  {itemDetails.name}
-                </span>
-              ) : (
-                <select
-                  value={orderItem.inventoryItemId}
-                  onChange={(e) =>
-                    handleOrderItemChange(
-                      index,
-                      "inventoryItemId",
-                      e.target.value
-                    )
-                  }
-                  className="bg-gray-700 text-white rounded p-2 flex-grow"
-                >
-                  <option value="">Seleccionar Artículo</option>
-                  {availableItems.map((i) => (
-                    <option key={i.id} value={i.id}>
-                      {i.name}
-                    </option>
-                  ))}
-                </select>
-              )}
-              <input
-                type="text"
-                placeholder="Cantidad"
-                value={tempOrderQuantities[index] ?? ""}
-                onChange={(e) =>
-                  handleOrderQuantityChange(index, e.target.value)
-                }
-                className="bg-gray-700 text-white rounded p-2 w-24"
-              />
-              <div className="relative w-28 invisible">
-                <input
-                  type="text"
-                  disabled
-                  className="bg-gray-700 text-white rounded p-2 w-full pr-8"
-                  value={"0,00"}
-                />
-                <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 pointer-events-none">
-                  €
-                </span>
-              </div>
-              <button
-                onClick={() => removeOrderItem(index)}
-                className="p-1 bg-red-600 rounded text-white h-7 w-7 flex items-center justify-center"
-              >
-                <TrashIcon className="h-4 w-4" />
-              </button>
-            </div>
-          );
-        })}
-        <button
-          onClick={addOrderItem}
-          className="text-indigo-400 hover:text-indigo-300 text-xs font-medium mt-1"
-        >
-          + Añadir Artículo (manualmente)
-        </button>
-        <div className="flex justify-end p-4 border-t border-gray-700 rounded-b-lg mt-4 bg-gray-800">
-          <button
-            onClick={closeOrderModal}
-            className="bg-gray-600 hover:bg-gray-700 text-white font-medium py-1.5 px-3.5 rounded-lg mr-2 text-sm transition duration-300"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={handleSaveOrder}
-            disabled={!canSave}
-            className={`font-medium py-1.5 px-3.5 rounded-lg text-sm transition duration-300 ${
-              canSave
-                ? "bg-indigo-600 hover:bg-indigo-700 text-white"
-                : "bg-slate-700 text-slate-500 cursor-not-allowed"
-            }`}
-            title={disabledTitle}
-          >
-            Guardar
-          </button>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="p-4 animate-fade-in">
-      {/* Contenedor Sticky para Título y Tabs */}
-      <div className="sticky top-16 z-20 bg-slate-900/90 backdrop-blur-sm pt-1 pb-3">
-        <div className="flex justify-between items-center mb-2">
-          {" "}
-          <div className="flex gap-1">
-            <div className="bg-gray-800 p-0.5 rounded-lg flex space-x-0.5">
-              {/* Botones de Pestaña */}
-              <button
-                onClick={() => setActiveTab("inventory")}
-                className={tabClasses("inventory")}
-              >
-                Inventario
-              </button>
-              <button
-                onClick={() => setActiveTab("orders")}
-                className={tabClasses("orders")}
-              >
-                Pedidos
-              </button>
-              <button
-                onClick={() => setActiveTab("analysis")}
-                className={tabClasses("analysis")}
-              >
-                Análisis
-              </button>
-              <button
-                onClick={() => setActiveTab("history")}
-                className={tabClasses("history")}
-              >
-                Historial
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* Fin Contenedor Sticky */}
       {activeTab === "inventory" && (
         <div className="space-y-6">
           {/* 🛑 CONTENEDOR DE CONTROLES SUPERIOR (FLEXIBLE PARA MÓVIL HORIZONTAL) */}
           {/* Usamos flex-nowrap y justify-between para forzar la línea y empujar los elementos al final. */}
           <div className="flex justify-between items-center mb-4 gap-2 flex-wrap sm:flex-nowrap">
-            {/* Campo de Búsqueda (Flex-grow para ocupar el espacio, comprimido en móvil, y ancho mínimo) */}
-            <div className="relative flex-grow min-w-[100px] max-w-[200px] w-auto">
+            {/* Campo de Búsqueda (Comprimido en móvil, y ancho mínimo) */}
+            <div className="relative flex-shrink-0 w-full min-w-[100px] max-w-xs sm:w-auto sm:max-w-[160px]">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                 <SearchIcon className="h-4 w-4" />
               </div>
@@ -1270,14 +986,15 @@ const InventoryComponent: React.FC<InventoryProps> = ({
               />
             </div>
 
-            {/* 🛑 SELECTOR DE UBICACIÓN GLOBAL (Ancho AUMENTADO a min-w-[180px] y flex-shrink) */}
-            <div className="flex-shrink w-full min-w-[180px] max-w-[200px] sm:w-auto">
+            {/* 🛑 SELECTOR DE UBICACIÓN GLOBAL (Ancho AUMENTADO a min-w-[120px] y flex-shrink) */}
+            <div className="flex-shrink-0 w-full min-w-[120px] max-w-[150px] sm:w-auto">
               <select
                 value={selectedLocationColumn}
                 onChange={(e) => setSelectedLocationColumn(e.target.value)}
                 className="bg-gray-700 text-white rounded-lg p-1.5 w-full text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
-                <option value="all">Todas las Ubicaciones</option>
+                {/* 🛑 CAMBIAMOS EL TEXTO DE LA OPCIÓN PRINCIPAL A "Todas" */}
+                <option value="all">Todas</option>
                 {INVENTORY_LOCATIONS.map((loc) => (
                   <option key={loc} value={loc}>
                     {loc}
@@ -1295,8 +1012,8 @@ const InventoryComponent: React.FC<InventoryProps> = ({
                 title="Resetear Stock a 0"
               >
                 <RefreshIcon className="h-4 w-4" />
-                {/* Ocultar texto en móvil/móvil horizontal, mostrar en MD (Desktop) */}
-                <span className="hidden md:inline">Resetear</span>
+                {/* Texto visible solo en MD (Desktop) */}
+                <span className="hidden sm:inline">Resetear</span>
               </button>
 
               <button
@@ -1305,7 +1022,7 @@ const InventoryComponent: React.FC<InventoryProps> = ({
                 title="Guardar Snapshot"
               >
                 <InventoryIcon className="h-4 w-4" />
-                <span className="hidden md:inline">Guardar</span>
+                <span className="hidden sm:inline">Guardar</span>
               </button>
 
               <button
