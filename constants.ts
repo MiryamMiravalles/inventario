@@ -1,6 +1,6 @@
 export const INVENTORY_LOCATIONS = [
   "Rest",
-  "Ofice Rest",
+  "Nevera",
   "B1",
   "Ofice B1",
   "B2",

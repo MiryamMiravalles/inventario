@@ -1222,7 +1222,7 @@ const App: React.FC = () => {
   }, [inventoryHistory]);
 
   // --- CÁLCULOS Y HELPERS ---
-  const navItems: { id: View; label: string }[] = [
+  const navItemsFull: { id: View; label: string }[] = [
     { id: "inventory", label: "Inventario" },
     { id: "orders", label: "Pedidos" },
     { id: "analysis", label: "Análisis" },
@@ -1441,10 +1441,11 @@ const App: React.FC = () => {
         inventoryHistory={inventoryHistory}
         onSaveInventoryRecord={handleSaveInventoryRecord}
         onDeleteAllInventoryRecords={handleDeleteAllHistoryRecords}
+        // PASAMOS LAS PROPIEDADES DE ESTADO/VISTA
+        activeTab={activeView}
         // PASAMOS LAS FUNCIONES DE UTILIDAD:
         formatUTCToLocal={formatUTCToLocal}
         handleResetInventoryStocks={handleResetInventoryStocks}
-        activeTab={activeView}
       />
     );
   };
@@ -1479,14 +1480,13 @@ const App: React.FC = () => {
                   aria-expanded="false"
                 >
                   <span className="sr-only">Open main menu</span>
-                  {/* Usamos iconos definidos en components/icons.tsx */}
                   {isMenuOpen ? <XIcon /> : <MenuIcon />}
                 </button>
               </div>
 
               {/* PESTAÑAS VISIBLES EN DESKTOP (md:block) */}
               <div className="hidden md:flex items-baseline space-x-4">
-                {navItems.map((item) => (
+                {navItemsFull.map((item) => (
                   <button
                     key={item.id}
                     onClick={() => setActiveView(item.id)}
@@ -1503,7 +1503,7 @@ const App: React.FC = () => {
         {isMenuOpen && (
           <div className="md:hidden" id="mobile-menu">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              {navItems.map((item) => (
+              {navItemsFull.map((item) => (
                 <button
                   key={item.id}
                   onClick={() => {

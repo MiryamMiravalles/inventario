@@ -760,11 +760,7 @@ const InventoryComponent: React.FC<InventoryProps> = ({
   const handleResetInventory = handleResetInventoryStocks; // ---- HANDLER PARA BORRADO COMPLETO DEL HISTORIAL (Se mantiene) ----
 
   const handleDeleteAllHistory = () => {
-    if (
-      window.confirm(
-        "¿Seguro que quieres borrar el historial completo de análisis e inventarios? ESTA ACCIÓN ES IRREVERSIBLE."
-      )
-    ) {
+    {
       onDeleteAllInventoryRecords();
     }
   }; // ---- RENDERIZADO DE DETALLES DEL HISTORIAL (Se mantiene) ----
@@ -786,9 +782,12 @@ const InventoryComponent: React.FC<InventoryProps> = ({
     const recordItems = viewingRecord.items as InventoryRecordItem[];
 
     const renderAnalysisTable = () => {
-      const consumedItems = recordItems.filter(
-        (item) => item.consumption > 0.001
-      );
+      // 🛑 FIX: Usar aserción para obtener un tipo seguro.
+      const currentRecord = viewingRecord as InventoryRecord | null;
+
+      const consumedItems = (
+        (currentRecord?.items as InventoryRecordItem[]) || []
+      ).filter((item) => item.consumption > 0.001);
 
       if (consumedItems.length === 0) {
         return (
@@ -798,59 +797,65 @@ const InventoryComponent: React.FC<InventoryProps> = ({
         );
       }
 
+      // 🎯 FIX: Se elimina el contenedor overflow-x-auto para forzar la adaptación
+      // Se reducen los anchos mínimos y el padding para que quepa en móvil.
       return (
-        <table className="min-w-full divide-y divide-gray-700">
-          <thead className="bg-gray-700/50">
-            <tr>
-              <th className="px-2 py-3 text-left text-xs font-medium text-gray-300 uppercase">
-                Artículo
-              </th>
-              <th className="px-2 py-3 text-right text-xs font-medium text-gray-300 uppercase">
-                Pedidos
-              </th>
-              <th className="px-2 py-3 text-right text-xs font-medium text-gray-300 uppercase">
-                Stock Inicial
-              </th>
-              <th className="px-2 py-3 text-right text-xs font-medium text-gray-300 uppercase">
-                Stock Final
-              </th>
-              <th className="px-2 py-3 text-right text-xs font-medium text-gray-300 uppercase">
-                Consumo
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-gray-800 divide-y divide-gray-700">
-            {consumedItems.map((item, itemIndex) => (
-              <tr key={item.itemId || itemIndex}>
-                <td className="px-2 py-2 whitespace-nowrap text-sm font-medium text-white">
-                  {item.name}
-                </td>
-                <td className="px-2 py-2 whitespace-nowrap text-sm text-right text-yellow-400">
-                  {item.pendingStock !== undefined
-                    ? item.pendingStock.toFixed(1).replace(".", ",")
-                    : "0.0"}
-                </td>
-                <td className="px-2 py-2 whitespace-nowrap text-sm text-right text-blue-400">
-                  {item.initialStock !== undefined
-                    ? item.initialStock.toFixed(1).replace(".", ",")
-                    : "-"}
-                </td>
-                <td className="px-2 py-2 whitespace-nowrap text-sm text-right text-yellow-400">
-                  {item.endStock !== undefined
-                    ? item.endStock.toFixed(1).replace(".", ",")
-                    : "-"}
-                </td>
-                <td
-                  className={`px-2 py-2 whitespace-nowrap text-lg text-right font-bold text-red-400`}
-                >
-                  {item.consumption !== undefined
-                    ? item.consumption.toFixed(1).replace(".", ",")
-                    : "-"}
-                </td>
+        <div>
+          <table className="min-w-full divide-y divide-gray-700">
+            <thead className="bg-gray-700/50">
+              <tr>
+                {/* Artículo: Damos más ancho, alineado a la izquierda */}
+                <th className="px-1 py-1 text-left text-xs font-medium text-gray-300 uppercase min-w-[80px] whitespace-normal">
+                  Artículo
+                </th>
+                {/* Columnas numéricas: Reducimos al máximo el padding (px-1, py-1) y el min-width (min-w-[50px]) */}
+                <th className="px-1 py-1 text-center text-xs font-medium text-gray-300 uppercase min-w-[50px] whitespace-normal">
+                  Pedidos
+                </th>
+                <th className="px-1 py-1 text-center text-xs font-medium text-gray-300 uppercase min-w-[60px] whitespace-normal">
+                  Stock Inicial
+                </th>
+                <th className="px-1 py-1 text-center text-xs font-medium text-gray-300 uppercase min-w-[50px] whitespace-normal">
+                  Stock Final
+                </th>
+                <th className="px-1 py-1 text-center text-xs font-medium text-gray-300 uppercase min-w-[50px] whitespace-normal">
+                  Consumo
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="bg-gray-800 divide-y divide-gray-700">
+              {consumedItems.map((item, itemIndex) => (
+                <tr key={item.itemId || itemIndex}>
+                  <td className="px-1 py-1 whitespace-nowrap text-xs font-medium text-white min-w-[80px]">
+                    {item.name}
+                  </td>
+                  <td className="px-1 py-1 whitespace-nowrap text-xs text-center text-yellow-400 min-w-[50px]">
+                    {item.pendingStock !== undefined
+                      ? item.pendingStock.toFixed(1).replace(".", ",")
+                      : "0.0"}
+                  </td>
+                  <td className="px-1 py-1 whitespace-nowrap text-xs text-center text-blue-400 min-w-[60px]">
+                    {item.initialStock !== undefined
+                      ? item.initialStock.toFixed(1).replace(".", ",")
+                      : "-"}
+                  </td>
+                  <td className="px-1 py-1 whitespace-nowrap text-xs text-center text-yellow-400 min-w-[50px]">
+                    {item.endStock !== undefined
+                      ? item.endStock.toFixed(1).replace(".", ",")
+                      : "-"}
+                  </td>
+                  <td
+                    className={`px-1 py-1 whitespace-nowrap text-xs text-center font-bold text-red-400 min-w-[50px]`}
+                  >
+                    {item.consumption !== undefined
+                      ? item.consumption.toFixed(1).replace(".", ",")
+                      : "-"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       );
     };
 
@@ -876,26 +881,36 @@ const InventoryComponent: React.FC<InventoryProps> = ({
         );
       }
 
+      // 🛑 CORRECCIÓN PARA ENCABEZADOS Y ALINEACIÓN DE NÚMEROS
+      // Aumentamos el ancho mínimo y alineamos el encabezado al centro.
+      const MIN_COL_WIDTH = "min-w-[90px]";
+      const ITEM_COL_WIDTH = "min-w-[150px]";
+
       return (
         <div className="overflow-x-auto">
-          <table className="divide-y divide-gray-700 w-full table-fixed">
+          {/* Eliminamos table-fixed para que las columnas se ajusten dinámicamente según el contenido */}
+          <table className="divide-y divide-gray-700 w-full">
             <thead className="bg-gray-700/50">
               <tr>
-                <th className="px-2 py-3 text-left text-xs font-medium text-gray-300 uppercase w-[150px]">
+                {/* Artículo: Ancho fijo para mejorar legibilidad */}
+                <th
+                  className={`px-2 py-3 text-left text-xs font-medium text-gray-300 uppercase ${ITEM_COL_WIDTH}`}
+                >
                   Artículo
                 </th>
                 {INVENTORY_LOCATIONS.map((loc) => (
                   <th
                     key={loc}
-                    className="px-2 py-3 text-right text-xs font-medium text-gray-300 uppercase w-[70px] whitespace-nowrap overflow-hidden text-ellipsis"
-                    style={{ minWidth: "70px", maxWidth: "70px" }}
+                    // Aplicamos el ancho mínimo y centramos el encabezado
+                    className={`px-2 py-3 text-center text-xs font-medium text-gray-300 uppercase ${MIN_COL_WIDTH} whitespace-nowrap`}
                   >
-                    {loc.length > 8 ? loc.substring(0, 6) + "..." : loc}
+                    {/* Quitamos overflow-hidden y text-ellipsis para que el nombre se vea completo */}
+                    {loc.toUpperCase()}
                   </th>
                 ))}
                 <th
-                  className="px-2 py-3 text-right text-xs font-medium text-gray-300 uppercase w-[70px] whitespace-nowrap"
-                  style={{ minWidth: "70px", maxWidth: "70px" }}
+                  // La columna TOTAL puede ser un poco más estrecha pero alineada a la derecha
+                  className={`px-2 py-3 text-right text-xs font-medium text-gray-300 uppercase min-w-[70px] whitespace-nowrap`}
                 >
                   Total
                 </th>
@@ -909,7 +924,10 @@ const InventoryComponent: React.FC<InventoryProps> = ({
                     key={item.itemId || itemIndex}
                     className="hover:bg-gray-700/50"
                   >
-                    <td className="px-2 py-2 whitespace-nowrap text-sm font-medium text-white w-[150px]">
+                    {/* Columna de Artículo */}
+                    <td
+                      className={`px-2 py-2 whitespace-nowrap text-sm font-medium text-white ${ITEM_COL_WIDTH}`}
+                    >
                       {item.name}
                     </td>
                     {INVENTORY_LOCATIONS.map((loc) => {
@@ -918,7 +936,8 @@ const InventoryComponent: React.FC<InventoryProps> = ({
                       return (
                         <td
                           key={loc}
-                          className={`px-2 py-2 whitespace-nowrap text-sm text-right w-[70px] overflow-hidden text-ellipsis ${
+                          // 🛑 CORRECCIÓN: Alineamos el valor del stock al centro para que quede bajo el encabezado centrado
+                          className={`px-2 py-2 whitespace-nowrap text-sm text-center ${MIN_COL_WIDTH} ${
                             stockValue > 0.001
                               ? "text-green-400"
                               : "text-slate-400"
@@ -928,8 +947,10 @@ const InventoryComponent: React.FC<InventoryProps> = ({
                         </td>
                       );
                     })}
+                    {/* Columna de Total */}
                     <td
-                      className={`px-2 py-2 whitespace-nowrap text-lg text-right font-bold w-[70px] overflow-hidden text-ellipsis ${
+                      // Alineamos el total a la derecha, para mejor legibilidad de números.
+                      className={`px-2 py-2 whitespace-nowrap text-lg text-right font-bold min-w-[70px] ${
                         calculatedTotal > 0.001
                           ? "text-green-400"
                           : "text-slate-400"
@@ -1208,68 +1229,69 @@ const InventoryComponent: React.FC<InventoryProps> = ({
     <div className="p-4 animate-fade-in">
       {activeTab === "inventory" && (
         <div className="space-y-6">
-          {/* 🛑 CONTENEDOR DE CONTROLES SUPERIOR (RESPONSIVE PARA UNA SOLA LÍNEA) */}
-          <div className="flex justify-between items-center mb-4 gap-2 flex-nowrap">
-            {/* Campo de Búsqueda (Comprimido en móvil, y ancho mínimo) */}
-            <div className="relative flex-shrink-0 w-full min-w-[100px] max-w-xs sm:w-auto sm:max-w-[160px]">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                <SearchIcon className="h-4 w-4" />
+          {/* 🛑 CONTENEDOR DE CONTROLES SUPERIOR: Implementación de cascada en móvil y fila en escritorio */}
+          <div className="flex flex-col sm:flex-row justify-start sm:justify-between items-start sm:items-center mb-4 gap-2">
+            {/* Contenedor Flex para Búsqueda y Ubicaciones (para que se apilen en móvil) */}
+            <div className="flex w-full gap-2 flex-wrap sm:flex-nowrap sm:justify-start">
+              {/* Campo de Búsqueda: Ahora tiene ancho fijo en desktop (sm:w-56) y sm:flex-grow para compartir */}
+              <div className="relative w-full max-w-none sm:w-56 order-1">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                  <SearchIcon className="h-4 w-4" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Buscar bebida..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="bg-gray-700 text-white rounded-lg pl-9 pr-3 py-1.5 w-full text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-400"
+                />
               </div>
-              <input
-                type="text"
-                placeholder="Buscar bebida..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="bg-gray-700 text-white rounded-lg pl-9 pr-3 py-1 w-full text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-400"
-              />
-            </div>
 
-            {/* 🛑 SELECTOR DE UBICACIÓN GLOBAL (Ancho Ajustado) */}
-            <div className="flex-shrink-0 w-full min-w-[120px] max-w-[150px] sm:w-auto">
-              <select
-                value={selectedLocationColumn}
-                onChange={(e) => setSelectedLocationColumn(e.target.value)}
-                className="bg-gray-700 text-white rounded-lg p-1.5 w-full text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                {/* 🛑 CAMBIAMOS EL TEXTO DE LA OPCIÓN PRINCIPAL A "Todas" */}
-                <option value="all">Todas</option>
-                {INVENTORY_LOCATIONS.map((loc) => (
-                  <option key={loc} value={loc}>
-                    {loc}
-                  </option>
-                ))}
-              </select>
+              {/* SELECTOR DE UBICACIÓN GLOBAL: Igual ancho fijo en desktop (sm:w-56) */}
+              <div className="flex-shrink-0 w-full max-w-none sm:w-56 order-2">
+                <select
+                  value={selectedLocationColumn}
+                  onChange={(e) => setSelectedLocationColumn(e.target.value)}
+                  className="bg-gray-700 text-white rounded-lg p-1.5 w-full text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option value="all">Todas</option>
+                  {INVENTORY_LOCATIONS.map((loc) => (
+                    <option key={loc} value={loc}>
+                      {loc}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-            {/* FIN SELECTOR */}
+            {/* FIN BÚSQUEDA Y UBICACIONES */}
 
-            {/* 🛑 Contenedor de Botones (Solo Íconos en móvil, Texto en desktop) */}
-            <div className="flex items-center gap-1 flex-shrink-0">
+            {/* 🛑 Contenedor de Botones (Orden 3, ancho completo en móvil, fila en escritorio) */}
+            <div className="flex items-center justify-between gap-2 flex-shrink-0 w-full sm:w-auto sm:justify-end order-3 mt-2 sm:mt-0">
               <button
                 onClick={handleResetInventory}
-                className="bg-red-600 hover:bg-red-700 text-white font-medium py-1.5 px-3 rounded-lg flex items-center gap-1.5 text-sm transition duration-300 h-7"
+                className="bg-red-600 hover:bg-red-700 text-white font-medium py-1.5 px-3 rounded-lg flex items-center justify-center gap-1 text-sm transition duration-300 h-7 w-1/3 sm:w-auto"
                 title="Resetear Stock a 0"
               >
                 <RefreshIcon className="h-4 w-4" />
-                {/* Ocultar texto en móvil/móvil horizontal, mostrar en MD (Desktop) */}
-                <span className="hidden sm:inline">Resetear</span>
+                <span>Resetear</span>
               </button>
 
               <button
                 onClick={handleSaveInventorySnapshot}
-                className="bg-violet-600 hover:bg-violet-700 text-white font-medium py-1.5 px-3 rounded-lg flex items-center gap-1.5 text-sm transition duration-300 h-7"
+                className="bg-violet-600 hover:bg-violet-700 text-white font-medium py-1.5 px-3 rounded-lg flex items-center justify-center gap-1 text-sm transition duration-300 h-7 w-1/3 sm:w-auto"
                 title="Guardar Snapshot"
               >
                 <InventoryIcon className="h-4 w-4" />
-                <span className="hidden sm:inline">Guardar</span>
+                <span>Guardar</span>
               </button>
 
               <button
                 onClick={() => openInventoryModal(undefined)}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-1.5 px-3 rounded-lg flex items-center gap-1.5 text-sm transition duration-300 h-7"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-1.5 px-3 rounded-lg flex items-center justify-center gap-1 text-sm transition duration-300 h-7 w-1/3 sm:w-auto"
                 title="Nuevo Producto"
               >
                 <PlusIcon className="h-4 w-4" />
-                <span className="hidden md:inline">Nuevo Producto</span>
+                <span>Nuevo Producto</span>
               </button>
             </div>
           </div>
@@ -1298,9 +1320,7 @@ const InventoryComponent: React.FC<InventoryProps> = ({
                       <thead>
                         <tr>
                           {/* 🛑 Celda de NOMBRE */}
-                          <th className="p-1 text-left text-xs font-medium text-gray-300 uppercase sticky left-0 bg-slate-800 z-10 w-full min-w-[150px] max-w-[220px] whitespace-nowrap overflow-hidden text-ellipsis">
-                            NOMBRE
-                          </th>
+                          <th className="p-1 text-left text-xs font-medium text-gray-300 uppercase sticky left-0 bg-slate-800 z-10 w-full min-w-[150px] max-w-[220px] whitespace-nowrap overflow-hidden text-ellipsis"></th>
                           {/* Determinar qué ubicaciones se muestran */}
                           {(selectedLocationColumn === "all"
                             ? INVENTORY_LOCATIONS
@@ -1431,7 +1451,9 @@ const InventoryComponent: React.FC<InventoryProps> = ({
               <span className="hidden md:inline">Nuevo Pedido</span>
             </button>
           </div>
-          <div className="bg-gray-800 shadow-xl rounded-lg overflow-x-auto">
+
+          {/* 🛑 INICIO: Vista de ESCRITORIO (Tabla tradicional, visible en sm: y superior) */}
+          <div className="bg-gray-800 shadow-xl rounded-lg overflow-x-auto hidden sm:block">
             <table className="min-w-full divide-y divide-gray-700">
               <thead className="bg-gray-700/50">
                 <tr>
@@ -1442,7 +1464,7 @@ const InventoryComponent: React.FC<InventoryProps> = ({
                     Proveedor
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">
-                    Estado
+                    &nbsp;Estado
                   </th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-300 uppercase">
                     Completado
@@ -1455,61 +1477,155 @@ const InventoryComponent: React.FC<InventoryProps> = ({
               <tbody className="bg-gray-800 divide-y divide-gray-700">
                 {purchaseOrders.map((order) => (
                   <tr key={order.id} className="hover:bg-gray-700/50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    {/* Columna Fecha Pedido: Agregamos align-middle */}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 align-middle">
                       {order.orderDate}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
+                    {/* Columna Proveedor: Agregamos align-middle */}
+                    <td className="px-6 py-4 whitespace-nowrap text-left text-sm font-medium text-white">
                       {order.supplierName}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                      <span
-                        className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          order.status === PurchaseOrderStatus.Completed ||
-                          order.status === PurchaseOrderStatus.Archived
-                            ? "bg-green-500/20 text-green-400"
-                            : "bg-yellow-500/20 text-yellow-400"
-                        }`}
-                      >
-                        {order.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm">
-                      {order.status === PurchaseOrderStatus.Pending && (
-                        <button
-                          onClick={() => handleReceiveOrder(order)}
-                          className="px-1.5 py-0.5 bg-green-600/30 text-green-400 hover:bg-green-600 hover:text-white rounded text-xs font-medium transition duration-300"
+                    {/* Columna Estado: Usamos flex para centrar verticalmente el chip */}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 align-middle">
+                      <div className="flex items-center h-full">
+                        <span
+                          className={`px-3 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            order.status === PurchaseOrderStatus.Completed ||
+                            order.status === PurchaseOrderStatus.Archived
+                              ? "bg-green-500/20 text-green-400"
+                              : "bg-yellow-500/20 text-yellow-400"
+                          }`}
                         >
-                          Recibir
-                        </button>
-                      )}
-                      {(order.status === PurchaseOrderStatus.Completed ||
-                        order.status === PurchaseOrderStatus.Archived) && (
-                        <span className="text-green-400 font-bold">OK</span>
-                      )}
+                          {order.status}
+                        </span>
+                      </div>
                     </td>
-                    <td className="px-4 py-2 whitespace-nowrap text-right text-sm">
-                      <button
-                        onClick={() => openOrderModal(order)}
-                        className="text-indigo-400 mr-2 h-4 w-4"
-                      >
-                        <PencilIcon />
-                      </button>
-                      <button
-                        onClick={() =>
-                          window.confirm(
-                            "¿Seguro que quieres eliminar este pedido?"
-                          ) && onDeletePurchaseOrder(order.id)
-                        }
-                        className="text-red-500 h-4 w-4"
-                      >
-                        <TrashIcon />
-                      </button>
+                    {/* Columna Completado: Usamos flex para centrar vertical y horizontalmente */}
+                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm align-middle">
+                      <div className="flex items-center justify-center h-full">
+                        {order.status === PurchaseOrderStatus.Pending && (
+                          <button
+                            onClick={() => handleReceiveOrder(order)}
+                            className="px-1.5 py-0.5 bg-green-600/30 text-green-400 hover:bg-green-600 hover:text-white rounded text-xs font-medium transition duration-300"
+                          >
+                            Recibir
+                          </button>
+                        )}
+                        {(order.status === PurchaseOrderStatus.Completed ||
+                          order.status === PurchaseOrderStatus.Archived) && (
+                          <span className="text-green-400 font-bold">OK</span>
+                        )}
+                      </div>
+                    </td>
+                    {/* Columna Acciones: Usamos flex para centrar verticalmente */}
+                    <td className="px-4 py-4 whitespace-nowrap text-right text-sm align-middle">
+                      <div className="flex items-center justify-end h-full">
+                        <button
+                          onClick={() => openOrderModal(order)}
+                          className="text-indigo-400 mr-2 h-4 w-4"
+                        >
+                          <PencilIcon />
+                        </button>
+                        <button
+                          onClick={() =>
+                            window.confirm(
+                              "¿Seguro que quieres eliminar este pedido?"
+                            ) && onDeletePurchaseOrder(order.id)
+                          }
+                          className="text-red-500 h-4 w-4"
+                        >
+                          <TrashIcon />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+          {/* 🛑 FIN: Vista de ESCRITORIO */}
+
+          {/* 🛑 INICIO: Vista de MÓVIL (Estructura de Tarjetas/Cascada, visible solo en móvil) */}
+          <div className="sm:hidden space-y-4">
+            {purchaseOrders.map((order) => {
+              const isCompleted =
+                order.status === PurchaseOrderStatus.Completed ||
+                order.status === PurchaseOrderStatus.Archived;
+
+              return (
+                <div
+                  key={order.id}
+                  className="bg-gray-800 shadow-xl rounded-lg p-4 border border-gray-700"
+                >
+                  {/* Fila 1: Proveedor y Estado */}
+                  <div className="flex justify-between items-start border-b border-gray-700 pb-2 mb-2">
+                    <h4 className="text-lg font-bold text-white flex-1 truncate">
+                      {order.supplierName}
+                    </h4>
+                    <span
+                      className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full flex-shrink-0 ${
+                        isCompleted
+                          ? "bg-green-500/20 text-green-400"
+                          : "bg-yellow-500/20 text-yellow-400"
+                      }`}
+                    >
+                      {order.status}
+                    </span>
+                  </div>
+
+                  {/* Fila 2: Detalles (Fecha y Opcional Fecha de Entrega) */}
+                  <div className="space-y-1 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400 font-medium">
+                        Fecha Pedido:
+                      </span>
+                      <span className="text-white">{order.orderDate}</span>
+                    </div>
+
+                    {/* Fila 3: Acciones */}
+                    <div className="pt-4 flex justify-between items-center border-t border-gray-700 mt-3">
+                      {/* Botones de Edición y Eliminación */}
+                      <div className="flex items-center space-x-3">
+                        <button
+                          onClick={() => openOrderModal(order)}
+                          className="text-indigo-400 hover:text-indigo-300 flex items-center gap-1"
+                        >
+                          <PencilIcon className="h-5 w-5" />
+                          <span className="text-sm">Editar</span>
+                        </button>
+                        <button
+                          onClick={() =>
+                            window.confirm(
+                              "¿Seguro que quieres eliminar este pedido?"
+                            ) && onDeletePurchaseOrder(order.id)
+                          }
+                          className="text-red-500 hover:text-red-400 flex items-center gap-1"
+                        >
+                          <TrashIcon className="h-5 w-5" />
+                          <span className="text-sm">Eliminar</span>
+                        </button>
+                      </div>
+
+                      {/* Botón Completado / OK */}
+                      {order.status === PurchaseOrderStatus.Pending ? (
+                        <button
+                          onClick={() => handleReceiveOrder(order)}
+                          className="px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-sm font-medium transition duration-300"
+                        >
+                          Recibir
+                        </button>
+                      ) : (
+                        <span className="text-green-400 font-bold text-lg">
+                          OK
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          {/* 🛑 FIN: Vista de MÓVIL */}
         </div>
       )}
       {activeTab === "analysis" && (
@@ -1537,30 +1653,49 @@ const InventoryComponent: React.FC<InventoryProps> = ({
                   initialOpen={true}
                 >
                   <div className="overflow-x-auto">
+                                       {" "}
                     <table className="min-w-full divide-y divide-gray-700">
+                                           {" "}
                       <thead className="bg-gray-700/50">
+                                               {" "}
                         <tr>
+                                                   {" "}
                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">
-                            Artículo
+                                                        Artículo                
+                                     {" "}
                           </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">
-                            Stock Actual
+                                                   {" "}
+                          <th className="px-4 py-3 text-center text-xs font-medium text-gray-300 uppercase">
+                                                        Stock Actual            
+                                         {" "}
                           </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">
-                            En Pedidos
+                                                   {" "}
+                          <th className="px-4 py-3 text-center text-xs font-medium text-gray-300 uppercase">
+                                                        En Pedidos              
+                                       {" "}
                           </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">
-                            Stock Semana Anterior
+                                                   {" "}
+                          <th className="px-4 py-3 text-center text-xs font-medium text-gray-300 uppercase">
+                                                        Stock Semana Anterior  
+                                                   {" "}
                           </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">
-                            Stock Inicial Total
+                                                   {" "}
+                          <th className="px-4 py-3 text-center text-xs font-medium text-gray-300 uppercase">
+                                                        Stock Inicial Total    
+                                                 {" "}
                           </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase">
-                            Consumo
+                                                   {" "}
+                          <th className="px-4 py-3 text-center text-xs font-medium text-gray-300 uppercase">
+                                                        Consumo                
+                                     {" "}
                           </th>
+                                                 {" "}
                         </tr>
+                                             {" "}
                       </thead>
+                                           {" "}
                       <tbody className="bg-gray-800 divide-y divide-gray-700">
+                                               {" "}
                         {items.map((item) => {
                           const totalStock = calculateTotalStock(item);
                           const pendingStock = stockInOrders[item.id] || 0;
@@ -1573,35 +1708,56 @@ const InventoryComponent: React.FC<InventoryProps> = ({
 
                           return (
                             <tr key={item.id} className="hover:bg-gray-700/50">
+                                                           {" "}
                               <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-white">
-                                {item.name}
+                                                                {item.name}     
+                                                       {" "}
                               </td>
-                              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-300">
-                                {totalStock.toFixed(1).replace(".", ",")}
+                                                           {" "}
+                              <td className="px-4 py-4 whitespace-nowrap text-sm text-center text-gray-300">
+                                                               {" "}
+                                {totalStock.toFixed(1).replace(".", ",")}       
+                                                     {" "}
                               </td>
-                              <td className="px-4 py-4 whitespace-nowrap text-sm text-yellow-400">
-                                {pendingStock.toFixed(1).replace(".", ",")}
+                                                           {" "}
+                              <td className="px-4 py-4 whitespace-nowrap text-sm text-center text-yellow-400">
+                                                               {" "}
+                                {pendingStock.toFixed(1).replace(".", ",")}     
+                                                       {" "}
                               </td>
-                              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-300">
-                                {previousEndStock.toFixed(1).replace(".", ",")}
+                                                           {" "}
+                              <td className="px-4 py-4 whitespace-nowrap text-sm text-center text-gray-300">
+                                                               {" "}
+                                {previousEndStock.toFixed(1).replace(".", ",")} 
+                                                           {" "}
                               </td>
-                              <td className="px-4 py-4 whitespace-nowrap text-sm text-blue-400 font-bold">
+                                                           {" "}
+                              <td className="px-4 py-4 whitespace-nowrap text-sm text-center text-blue-400 font-bold">
+                                                               {" "}
                                 {initialTotalStock.toFixed(1).replace(".", ",")}
+                                                             {" "}
                               </td>
+                                                           {" "}
                               <td
-                                className={`px-4 py-4 whitespace-nowrap text-sm font-bold ${
+                                className={`px-4 py-4 whitespace-nowrap text-sm font-bold text-center ${
                                   consumption >= 0
                                     ? "text-green-400"
                                     : "text-red-400"
                                 }`}
                               >
-                                {consumption.toFixed(1).replace(".", ",")}
+                                                               {" "}
+                                {consumption.toFixed(1).replace(".", ",")}     
+                                                       {" "}
                               </td>
+                                                         {" "}
                             </tr>
                           );
                         })}
+                                             {" "}
                       </tbody>
+                                         {" "}
                     </table>
+                                     {" "}
                   </div>
                 </CategoryAccordion>
               )
@@ -1645,7 +1801,7 @@ const InventoryComponent: React.FC<InventoryProps> = ({
                   <div className="flex gap-3">
                     <button
                       onClick={() => openRecordDetailModal(record)}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition duration-300"
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold py-1 px-4 rounded-lg flex items-center gap-2 transition duration-300"
                     >
                       Ver Detalles
                     </button>
