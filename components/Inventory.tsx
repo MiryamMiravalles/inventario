@@ -1230,9 +1230,11 @@ const InventoryComponent: React.FC<InventoryProps> = ({
           {/* 🛑 CONTENEDOR DE CONTROLES SUPERIOR: Implementación de cascada en móvil y fila en escritorio */}
           <div className="flex flex-col sm:flex-row justify-start sm:justify-between items-start sm:items-center mb-4 gap-2">
             {/* Contenedor Flex para Búsqueda y Ubicaciones (para que se apilen en móvil) */}
-            <div className="flex w-full gap-2 flex-wrap sm:flex-nowrap sm:justify-start">
+            {/* 🛑 CAMBIO: Usamos 'flex-nowrap' en móviles y 'w-full' para que ocupen todo el ancho */}
+            <div className="flex w-full gap-2 flex-nowrap sm:justify-start">
               {/* Campo de Búsqueda: Ahora tiene ancho fijo en desktop (sm:w-56) y sm:flex-grow para compartir */}
-              <div className="relative w-full max-w-none sm:w-56 order-1">
+              {/* 🛑 CAMBIO: Asignamos un ancho fraccional (w-7/12) para que sea más largo que el selector */}
+              <div className="relative w-7/12 max-w-none sm:w-56 order-1">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                   <SearchIcon className="h-4 w-4" />
                 </div>
@@ -1246,13 +1248,13 @@ const InventoryComponent: React.FC<InventoryProps> = ({
               </div>
 
               {/* SELECTOR DE UBICACIÓN GLOBAL: Igual ancho fijo en desktop (sm:w-56) */}
-              <div className="flex-shrink-0 w-full max-w-none sm:w-56 order-2">
+              {/* 🛑 CAMBIO: Asignamos un ancho fraccional (w-5/12) para que sea más corto */}
+              <div className="flex-shrink-0 w-5/12 max-w-none sm:w-56 order-2">
                 <select
                   value={selectedLocationColumn}
                   onChange={(e) => setSelectedLocationColumn(e.target.value)}
-                  // 🛑 CORRECCIÓN CLAVE: Agregando min-w-0 para evitar el encogimiento de Safari.
-                  // Aplicar un min-width para el selector, y asegurar w-full en su contenedor.
-                  className="bg-gray-700 text-white rounded-lg p-1.5 w-full text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-0"
+                  // Mantenemos min-w y appearance-none para compatibilidad con Safari
+                  className="bg-gray-700 text-white rounded-lg p-1.5 w-full text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-[100px] appearance-none"
                 >
                   <option value="all">Todas</option>
                   {INVENTORY_LOCATIONS.map((loc) => (
@@ -1510,7 +1512,7 @@ const InventoryComponent: React.FC<InventoryProps> = ({
                         {order.status === PurchaseOrderStatus.Pending && (
                           <button
                             onClick={() => handleReceiveOrder(order)}
-                            className="px-3 py-1 bg-green-600/30 text-green-400 hover:bg-green-600 hover:text-white rounded-xl text-xs font-medium transition duration-300"
+                            className="px-1.5 py-0.5 bg-green-600/30 text-green-400 hover:bg-green-600 hover:text-white rounded-xl text-xs font-medium transition duration-300"
                           >
                             Recibir
                           </button>
