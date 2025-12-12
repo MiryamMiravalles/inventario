@@ -1442,16 +1442,20 @@ const InventoryComponent: React.FC<InventoryProps> = ({
       )}
       {activeTab === "orders" && (
         <div>
-          <div className="text-right mb-4">
+          {/* Contenedor que alinea el botón a la derecha */}       
+          <div className="flex justify-end mb-4">
+                     
             <button
               onClick={() => openOrderModal()}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-1 px-3 rounded-lg flex items-center gap-1.5 text-sm transition duration-300 ml-auto"
+              // 🎯 FIX: Quitado w-full para móvil. El botón será 'sm:w-56' en todos los tamaños y flotará a la derecha (gracias a justify-end)
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-1 px-2 rounded-lg flex items-center justify-center gap-2 text-sm transition duration-300 h-7"
+              title="Nuevo Pedido"
             >
-              <PlusIcon className="h-4 w-4" />
-              <span className="hidden md:inline">Nuevo Pedido</span>
+                            <PlusIcon className="h-4 w-4" />       
+              <span>Nuevo Pedido</span> 
             </button>
+                     
           </div>
-
           {/* 🛑 INICIO: Vista de ESCRITORIO (Tabla tradicional, visible en sm: y superior) */}
           <div className="bg-gray-800 shadow-xl rounded-lg overflow-x-auto hidden sm:block">
             <table className="min-w-full divide-y divide-gray-700">
@@ -1544,7 +1548,6 @@ const InventoryComponent: React.FC<InventoryProps> = ({
             </table>
           </div>
           {/* 🛑 FIN: Vista de ESCRITORIO */}
-
           {/* 🛑 INICIO: Vista de MÓVIL (Estructura de Tarjetas/Cascada, visible solo en móvil) */}
           <div className="sm:hidden space-y-4">
             {purchaseOrders.map((order) => {
