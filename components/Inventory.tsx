@@ -1250,7 +1250,9 @@ const InventoryComponent: React.FC<InventoryProps> = ({
                 <select
                   value={selectedLocationColumn}
                   onChange={(e) => setSelectedLocationColumn(e.target.value)}
-                  className="bg-gray-700 text-white rounded-lg p-1.5 w-full text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  // 🛑 CORRECCIÓN CLAVE: Agregando min-w-0 para evitar el encogimiento de Safari.
+                  // Aplicar un min-width para el selector, y asegurar w-full en su contenedor.
+                  className="bg-gray-700 text-white rounded-lg p-1.5 w-full text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-0"
                 >
                   <option value="all">Todas</option>
                   {INVENTORY_LOCATIONS.map((loc) => (
