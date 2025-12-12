@@ -1230,8 +1230,8 @@ const InventoryComponent: React.FC<InventoryProps> = ({
           {/* 🛑 CONTENEDOR DE CONTROLES SUPERIOR: Implementación de cascada en móvil y fila en escritorio */}
           <div className="flex flex-col sm:flex-row justify-start sm:justify-between items-start sm:items-center mb-4 gap-2">
             {/* Contenedor Flex para Búsqueda y Ubicaciones (para que se apilen en móvil) */}
-            {/* 🛑 CAMBIO: Usamos 'flex-nowrap' en móviles y 'w-full' para que ocupen todo el ancho */}
-            <div className="flex w-full gap-2 flex-nowrap sm:justify-start">
+            {/* 🛑 CAMBIO: Usamos 'flex-wrap' en móviles y 'w-full' para que ocupen todo el ancho */}
+            <div className="flex w-full gap-2 flex-wrap sm:justify-start">
               {/* Campo de Búsqueda: Ahora tiene ancho fijo en desktop (sm:w-56) y sm:flex-grow para compartir */}
               {/* 🛑 CAMBIO: Asignamos un ancho fraccional (w-7/12) para que sea más largo que el selector */}
               <div className="relative w-7/12 max-w-none sm:w-56 order-1">
@@ -1249,14 +1249,14 @@ const InventoryComponent: React.FC<InventoryProps> = ({
 
               {/* SELECTOR DE UBICACIÓN GLOBAL: Igual ancho fijo en desktop (sm:w-56) */}
               {/* 🛑 CAMBIO: Asignamos un ancho fraccional (w-5/12) para que sea más corto */}
-              <div className="flex-shrink-0 w-5/12 max-w-none sm:w-56 order-2">
+              <div className="flex-shrink-0 w-7/12 max-w-none sm:w-56 order-2">
                 <select
                   value={selectedLocationColumn}
                   onChange={(e) => setSelectedLocationColumn(e.target.value)}
                   // Mantenemos min-w y appearance-none para compatibilidad con Safari
-                  className="bg-gray-700 text-white rounded-lg p-1.5 w-full text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-[100px] appearance-none"
+                  className="bg-gray-700 text-white rounded-lg p-1.5 w-full text-sm border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-[100px]"
                 >
-                  <option value="all">Todas</option>
+                  <option value="all">Todas las ubicaciones</option>
                   {INVENTORY_LOCATIONS.map((loc) => (
                     <option key={loc} value={loc}>
                       {loc}
