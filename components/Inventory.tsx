@@ -509,7 +509,7 @@ const InventoryComponent: React.FC<InventoryProps> = ({
     onSavePurchaseOrder(orderToSave);
 
     alert(
-      "Pedido guardado correctamente. Los artículos aparecerán en 'En Pedidos' hasta ser recibidos."
+      "Pedido guardado correctamente. Los artículos no aparecerán en 'En Pedidos' hasta ser recibidos"
     );
     closeOrderModal();
   };
@@ -683,7 +683,7 @@ const InventoryComponent: React.FC<InventoryProps> = ({
     onSaveInventoryRecord(newRecord);
 
     alert(
-      `Instantánea del inventario (${formattedDate}) guardada en el historial. El Stock Actual NO ha sido modificado.`
+      `Instantánea del inventario (${formattedDate}) guardada en el historial`
     );
   }; // --- Guardar Análisis de Consumo (Pestaña Análisis) --- // 🛑 CORRECCIÓN: Convertir a async y usar await en onBulkUpdateInventoryItems
 
@@ -736,7 +736,7 @@ const InventoryComponent: React.FC<InventoryProps> = ({
     const newRecord: InventoryRecord = {
       id: crypto.randomUUID(),
       date: recordDate.toISOString(),
-      label: `Análisis de consumo (${formattedDate})`,
+      label: `Análisis (${formattedDate})`,
       items: recordItems,
       type: "analysis",
     };
@@ -752,9 +752,7 @@ const InventoryComponent: React.FC<InventoryProps> = ({
         } as PurchaseOrder);
       });
 
-    alert(
-      `Análisis de consumo (${formattedDate}) guardado. El stock físico actual ha sido reseteado a 0. Las cantidades contadas se han guardado en el historial de análisis.`
-    );
+    alert(`Análisis de consumo (${formattedDate}) guardado`);
   }; // --- FUNCIÓN DE RESETEO A 0 (Se mantiene la referencia a la prop) ---
 
   const handleResetInventory = handleResetInventoryStocks; // ---- HANDLER PARA BORRADO COMPLETO DEL HISTORIAL (Se mantiene) ----
@@ -1510,7 +1508,7 @@ const InventoryComponent: React.FC<InventoryProps> = ({
                         {order.status === PurchaseOrderStatus.Pending && (
                           <button
                             onClick={() => handleReceiveOrder(order)}
-                            className="px-1.5 py-0.5 bg-green-600/30 text-green-400 hover:bg-green-600 hover:text-white rounded text-xs font-medium transition duration-300"
+                            className="px-3 py-1 bg-green-600/30 text-green-400 hover:bg-green-600 hover:text-white rounded-xl text-xs font-medium transition duration-300"
                           >
                             Recibir
                           </button>

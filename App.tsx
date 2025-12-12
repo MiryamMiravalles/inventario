@@ -1334,7 +1334,6 @@ const App: React.FC = () => {
       }
       await api.history.deleteAll();
       setInventoryHistory([]);
-      alert("Historial eliminado correctamente.");
     } catch (e) {
       console.error("Error deleting all history:", e);
       alert(
@@ -1418,9 +1417,6 @@ const App: React.FC = () => {
 
     if (updatesToReset.length > 0) {
       handleBulkUpdateInventoryItems(updatesToReset, "set");
-      alert(
-        "Stock físico reseteado a 0. Puede comenzar el nuevo conteo físico."
-      );
     } else {
       alert("No hay artículos en el inventario para resetear.");
     }
